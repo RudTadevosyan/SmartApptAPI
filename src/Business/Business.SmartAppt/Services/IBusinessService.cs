@@ -13,7 +13,8 @@ namespace Business.SmartAppt.Services
         Task<BaseResponse<BusinessModel>> CreateBusinessAsync(CreateBusinessModel business);
         Task<BaseResponse<bool>> UpdateBusinessAsync(int businessId, UpdateBusinessModel business);
         Task<BaseResponse<bool>> DeleteBusinessAsync(int businessId);
-        Task<BaseResponse<BusinessModel> > GetMyBusinessAsync(int businessId);
+        Task<BaseResponse<BusinessModel>> GetMyBusinessAsync(int businessId);
+        Task<BaseResponse<IEnumerable<CustomerModel>>> GetBusinessCustomers(int businessId, int pageNumber = 1, int pageSize = 10);
 
         // Service
         Task<BaseResponse<ServiceModel>> AddServiceAsync(int businessId, CreateServiceModel service);
@@ -35,6 +36,7 @@ namespace Business.SmartAppt.Services
         
         // Bookings 
         Task<BaseResponse<IEnumerable<BookingModel>>> GetCurrentActiveBookings(int businessId, int pageNumber = 1, int pageSize = 10);
+        Task<BaseResponse<IEnumerable<BookingModel>>> GetAllBookingsAsync(int businessId, BookingRequest request, int pageNumber = 1, int pageSize = 10);
         Task<BaseResponse<IEnumerable<BookingModel>>> GetDailyBookingsAsync(int businessId, DateTime date, int pageNumber = 1, int pageSize = 10);
         Task<BaseResponse<bool>> ConfirmBookingAsync(int businessId, int bookingId);
         Task<BaseResponse<bool>> CancelBookingAsync(int businessId, int bookingId);

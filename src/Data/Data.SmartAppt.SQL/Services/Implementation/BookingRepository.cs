@@ -79,7 +79,8 @@ namespace Data.SmartAppt.SQL.Services.Implementation
                     StartAtUtc = reader.GetDateTime(ordStart),
                     EndAtUtc = reader.GetDateTime(ordEnd),
                     Status = reader.GetString(ordStatus),
-                    Notes = reader.GetString(ordNotes),
+                    Notes = reader.IsDBNull(ordNotes) ? null : reader.GetString(ordNotes),
+                    
                 });
             }
 
@@ -152,7 +153,8 @@ namespace Data.SmartAppt.SQL.Services.Implementation
                     StartAtUtc = reader.GetDateTime(ordStart),
                     EndAtUtc = reader.GetDateTime(ordEnd),
                     Status = reader.GetString(ordStatus),
-                    Notes = reader.GetString(ordNotes),
+                    Notes = reader.IsDBNull(ordNotes) ? null : reader.GetString(ordNotes),
+                    
                 });
             }
 
@@ -169,7 +171,12 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             cmd.Parameters.Add(new SqlParameter("@BusinessId", SqlDbType.Int) { Value = filter.BusinessId ?? (object)DBNull.Value });
             cmd.Parameters.Add(new SqlParameter("@ServiceId", SqlDbType.Int) { Value = filter.ServiceId ?? (object)DBNull.Value });
             cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = filter.CustomerId ?? (object)DBNull.Value });
-            cmd.Parameters.Add(new SqlParameter("@Status", SqlDbType.NVarChar, 12) { Value = !string.IsNullOrEmpty(filter.Status) ? filter.Status : DBNull.Value });
+            cmd.Parameters.Add(new SqlParameter("@Status", SqlDbType.NVarChar, 12)
+            {
+                Value = filter.Status.HasValue
+                    ? filter.Status.Value.ToString()
+                    : DBNull.Value
+            });
             cmd.Parameters.Add(new SqlParameter("@Date", SqlDbType.Date) { Value = filter.Date ?? (object)DBNull.Value });
             cmd.Parameters.Add(new SqlParameter("@PageNumber", SqlDbType.Int) { Value = filter.PageNumber ?? 1 });
             cmd.Parameters.Add(new SqlParameter("@PageSize", SqlDbType.Int) { Value = filter.PageSize ?? 10 });
