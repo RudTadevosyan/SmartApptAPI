@@ -54,4 +54,6 @@ appsettings.json
 *.DotSettings.user
 
 appsettings*.json
-!appsettings.example.json   # if you have a template to keep
+
+# if you have a template to keep
+!appsettings.example.json 

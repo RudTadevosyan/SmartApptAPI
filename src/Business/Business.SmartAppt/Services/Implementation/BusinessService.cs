@@ -6,7 +6,6 @@ using Business.SmartAppt.Models.HoursModels;
 using Business.SmartAppt.Models.ServiceModels;
 using Data.SmartAppt.SQL.Models;
 using Data.SmartAppt.SQL.Services;
-using Data.SmartAppt.SQL.Services.Implementation;
 
 namespace Business.SmartAppt.Services.Implementation
 {
@@ -17,16 +16,18 @@ namespace Business.SmartAppt.Services.Implementation
         protected readonly IBusinessRepository BusinessRepository;
         protected readonly IOpeningHoursRepository OpeningHoursRepository;
         protected readonly IHolidayRepository HolidayRepository;
+        protected readonly ICustomerRepository CustomerRepository;
 
         public BusinessService
             (IBookingRepository bookingRepository, IServiceRepository serviceRepository, IBusinessRepository businessRepository,
-            IOpeningHoursRepository openingHoursRepository, IHolidayRepository holidayRepository)
+            IOpeningHoursRepository openingHoursRepository, IHolidayRepository holidayRepository, ICustomerRepository customerRepository)
         {
             BookingRepository = bookingRepository;
             ServiceRepository = serviceRepository;
             BusinessRepository = businessRepository;
             OpeningHoursRepository = openingHoursRepository;
             HolidayRepository = holidayRepository;
+            CustomerRepository = customerRepository;
         }
 
 
@@ -136,6 +137,47 @@ namespace Business.SmartAppt.Services.Implementation
             catch (Exception ex)
             {
                 return new BaseResponse<BusinessModel>  { HttpStatusCode = 500, Message = ex.Message };
+            }
+        }
+
+        public virtual async Task<BaseResponse<IEnumerable<CustomerModel>>> GetBusinessCustomers(int businessId, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                if (pageNumber < 1)
+                    pageNumber = 1;
+            
+                if (pageSize < 1)
+                    pageSize = 10;
+            
+                if(pageSize > 100)
+                    pageSize = 100;
+                
+                var business = await BusinessRepository.GetByIdAsync(businessId);
+                if (business == null)
+                    return new BaseResponse<IEnumerable<CustomerModel>> { HttpStatusCode = 404, Message = $"Business with {businessId} id not found" };
+                
+                var customers = await CustomerRepository.GetByBusinessIdAsync(businessId, pageNumber, pageSize);
+                List<CustomerModel> customerList = new List<CustomerModel>();
+
+                foreach (var c in customers)
+                {
+                    customerList.Add(new CustomerModel
+                    {
+                        CustomerId = c.CustomerId,
+                        BusinessId = c.BusinessId,
+                        FullName = c.FullName,
+                        Email = c.Email,
+                        Phone = c.Phone,
+                    });
+                }
+                
+                return new BaseResponse<IEnumerable<CustomerModel>> { Data = customerList, HttpStatusCode = 200, Message = "Success" };
+                
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<IEnumerable<CustomerModel>> { HttpStatusCode = 500, Message = ex.Message };
             }
         }
 
@@ -537,7 +579,7 @@ namespace Business.SmartAppt.Services.Implementation
                 BookingFilter filter = new BookingFilter
                 {
                     BusinessId = business.BusinessId,
-                    Status = "Confirmed",
+                    Status = BookingStatus.Confirmed,
                     PageNumber = pageNumber,
                     PageSize = pageSize
                 };
@@ -573,6 +615,63 @@ namespace Business.SmartAppt.Services.Implementation
             }
         }
         
+        public virtual async Task<BaseResponse<IEnumerable<BookingModel>>> GetAllBookingsAsync(int businessId, BookingRequest request, int pageNumber = 1, int pageSize = 10)
+        {
+            try
+            {
+                if (pageNumber < 1)
+                    pageNumber = 1;
+            
+                if (pageSize < 1)
+                    pageSize = 10;
+            
+                if(pageSize > 100)
+                    pageSize = 100;
+                
+                var business = await BusinessRepository.GetByIdAsync(businessId);
+                if (business == null)
+                    return new BaseResponse<IEnumerable<BookingModel>> { HttpStatusCode = 404, Message = $"Business with business {businessId} id not found" };
+                
+                BookingFilter filter = new BookingFilter
+                {
+                    BusinessId = business.BusinessId,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Status = request.Status
+                };
+                
+                var bookings = await BookingRepository.GetAllSpecAsync(filter);
+                
+                List<BookingModel> bookingsList = new List<BookingModel>();
+
+                foreach (var b in bookings)
+                {
+                    bookingsList.Add(new BookingModel
+                    {
+                        BookingId = b.BookingId,
+                        BusinessId = b.BusinessId,
+                        ServiceId = b.ServiceId,
+                        CustomerId = b.CustomerId,
+                        StartAtUtc = b.StartAtUtc,
+                        EndAtUtc = b.EndAtUtc,
+                        Status = b.Status,
+                        Notes = b.Notes,
+                    });
+                }
+
+                return new BaseResponse<IEnumerable<BookingModel>>
+                {
+                    Data = bookingsList,
+                    HttpStatusCode = 200,
+                };
+                
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<IEnumerable<BookingModel>> { HttpStatusCode = 500, Message = ex.Message };
+            }
+        }
+
         public virtual async Task<BaseResponse<IEnumerable<BookingModel>>> GetDailyBookingsAsync(int businessId, DateTime date, int pageNumber = 1, int pageSize = 10)
         {
             try
@@ -675,7 +774,7 @@ namespace Business.SmartAppt.Services.Implementation
                 {
                     BusinessId = businessId,
                     Date = booking.StartAtUtc,
-                    Status = "Pending",
+                    Status = BookingStatus.Pending,
                 };
                 var otherBookings = await BookingRepository.GetAllSpecAsync(filter);
 

@@ -108,6 +108,9 @@ namespace Business.SmartAppt.Services.Implementation
 
                 if (!service.IsActive)
                     return new BaseResponse<BookingModel> { HttpStatusCode = 400, Message = "Service is not active" };
+                
+                if (customer.BusinessId != business.BusinessId) // depends on the logic
+                    return new BaseResponse<BookingModel> { HttpStatusCode = 400, Message = "Customer doesn't belong to this business" };
 
                 // determine the ending time
                 var endAtUtc = booking.StartAtUtc.AddMinutes(service.DurationMin);
@@ -156,7 +159,7 @@ namespace Business.SmartAppt.Services.Implementation
                 {
                     BusinessId = booking.BusinessId,
                     ServiceId = booking.ServiceId,
-                    Status = "Confirmed",
+                    Status = BookingStatus.Confirmed,
                     Date = booking.StartAtUtc.Date
                 });
                 
@@ -286,7 +289,7 @@ namespace Business.SmartAppt.Services.Implementation
                 {
                     BusinessId = businessId,
                     ServiceId = serviceId,
-                    Status = "Confirmed",
+                    Status = BookingStatus.Confirmed,
                     Date = new DateTime(date.Year, date.Month, date.Day)
                 });
 
@@ -502,7 +505,7 @@ namespace Business.SmartAppt.Services.Implementation
                 {
                     BusinessId = proposedBooking.BusinessId,
                     ServiceId = proposedBooking.ServiceId,
-                    Status = "Confirmed",
+                    Status = BookingStatus.Confirmed,
                     Date = proposedBooking.StartAtUtc.Date
                 });
 

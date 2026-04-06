@@ -87,7 +87,7 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             return customers;
         }
 
-        public virtual async Task<IEnumerable<CustomerEntity>> GetByBusinessIdAsync(int businessId)
+        public virtual async Task<IEnumerable<CustomerEntity>> GetByBusinessIdAsync(int businessId, int pageNumber = 1, int pageSize = 10)
         {
             await EnsureOpenAsync();
 
@@ -96,6 +96,8 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             cmd.CommandType = CommandType.StoredProcedure;
             
             cmd.Parameters.Add(new SqlParameter("@BusinessId", SqlDbType.Int) { Value = businessId });
+            cmd.Parameters.Add(new SqlParameter("@PageNumber", SqlDbType.Int) { Value = pageNumber });
+            cmd.Parameters.Add(new SqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize });
 
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())

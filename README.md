@@ -1,6 +1,6 @@
 # SmartAppt — Appointment Management System
 
-**SmartAppt** is a modular appointment-booking system built for the Digitain Academy program.
+**SmartAppt** is a modular appointment-booking system that allows businesses to manage their services, working schedules, and customer bookings. Customers can reserve time slots for services, while business owners manage availability, pricing, and operational constraints. 
 The project uses **C#, ASP.NET 8, and ADO.NET with SQL Server** (MSSQL), relying on stored procedures for all database operations.
 
 The system follows a strict **layered architecture**, keeping every concern cleanly separated and maintainable:

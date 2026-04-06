@@ -1,4 +1,5 @@
-﻿using Business.SmartAppt.Models.BusinessModels;
+﻿using Business.SmartAppt.Models.BookingModels;
+using Business.SmartAppt.Models.BusinessModels;
 using Business.SmartAppt.Models.HolidayModels;
 using Business.SmartAppt.Models.HoursModels;
 using Business.SmartAppt.Models.ServiceModels;
@@ -136,7 +137,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
         
-        [HttpGet("{businessId}/bookings")]
+        [HttpGet("{businessId}/bookings/confirmed")]
         public async Task<IActionResult> GetCurrentBookings(
             int businessId,
             [FromQuery] int pageNumber = 1,
@@ -171,6 +172,25 @@ namespace SmartAppt.API.Controllers
         public async Task<IActionResult> CancelBooking(int businessId, int bookingId)
         {
             var result = await _businessService.CancelBookingAsync(businessId, bookingId);
+            return StatusCode(result.HttpStatusCode, result);
+        }
+
+        [HttpGet("{businessId}/bookings/")]
+        public async Task<IActionResult> GetBookings(
+            int businessId,
+            [FromQuery] BookingRequest request,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var result = await _businessService.GetAllBookingsAsync(businessId, request, pageNumber, pageSize);
+            return StatusCode(result.HttpStatusCode, result);
+        }
+
+        [HttpGet("{businessId}/customers/")]
+        public async Task<IActionResult> GetBusinessCustomers(int businessId, [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var result = await _businessService.GetBusinessCustomers(businessId, pageNumber, pageSize);
             return StatusCode(result.HttpStatusCode, result);
         }
     }
