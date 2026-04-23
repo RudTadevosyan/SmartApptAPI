@@ -10,35 +10,35 @@ namespace Business.SmartAppt.Services
     public interface IBusinessService
     {
         // Business
-        Task<BaseResponse<BusinessModel>> CreateBusinessAsync(CreateBusinessModel business);
-        Task<BaseResponse<bool>> UpdateBusinessAsync(int businessId, UpdateBusinessModel business);
-        Task<BaseResponse<bool>> DeleteBusinessAsync(int businessId);
-        Task<BaseResponse<BusinessModel>> GetMyBusinessAsync(int businessId);
-        Task<BaseResponse<IEnumerable<CustomerModel>>> GetBusinessCustomers(int businessId, int pageNumber = 1, int pageSize = 10);
+        Task<BaseResponse<BusinessModel>> CreateBusinessAsync(Guid ownerUserId, CreateBusinessModel business, CancellationToken ct = default);
+        Task<BaseResponse<bool>> UpdateBusinessAsync(Guid ownerUserId, int businessId, UpdateBusinessModel business, CancellationToken ct = default);
+        Task<BaseResponse<bool>> DeleteBusinessAsync(Guid ownerUserId, int businessId, CancellationToken ct = default);
+        Task<BaseResponse<BusinessModel>> GetMyBusinessAsync(Guid ownerUserId, int businessId, CancellationToken ct = default);
+        Task<BaseResponse<IEnumerable<CustomerModel>>> GetBusinessCustomers(Guid ownerUserId, int businessId, int pageNumber = 1, int pageSize = 10, CancellationToken ct = default);
 
         // Service
-        Task<BaseResponse<ServiceModel>> AddServiceAsync(int businessId, CreateServiceModel service);
-        Task<BaseResponse<bool>> UpdateServiceAsync(int businessId, int serviceId, UpdateServiceModel service);
-        Task<BaseResponse<bool>> DeleteServiceAsync(int businessId, int serviceId);
-        Task<BaseResponse<bool>> ActivateServiceAsync(int businessId, int serviceId);
-        Task<BaseResponse<bool>> DeactivateServiceAsync(int businessId, int serviceId);
-        Task<BaseResponse<IEnumerable<ServiceModel>>> GetMyServicesAsync(int businessId);
+        Task<BaseResponse<ServiceModel>> AddServiceAsync(Guid ownerUserId, int businessId, CreateServiceModel service, CancellationToken ct = default);
+        Task<BaseResponse<bool>> UpdateServiceAsync(Guid ownerUserId, int businessId, int serviceId, UpdateServiceModel service, CancellationToken ct = default);
+        Task<BaseResponse<bool>> DeleteServiceAsync(Guid ownerUserId, int businessId, int serviceId, CancellationToken ct = default);
+        Task<BaseResponse<bool>> ActivateServiceAsync(Guid ownerUserId, int businessId, int serviceId, CancellationToken ct = default);
+        Task<BaseResponse<bool>> DeactivateServiceAsync(Guid ownerUserId, int businessId, int serviceId, CancellationToken ct = default);
+        Task<BaseResponse<IEnumerable<ServiceModel>>> GetMyServicesAsync(Guid ownerUserId, int businessId, CancellationToken ct = default);
 
         // OpeningHours
-        Task<BaseResponse<HoursModel>> AddOpeningHoursAsync(int businessId,CreateHoursModel hours);
-        Task<BaseResponse<bool>> UpdateOpeningHoursAsync(int businessId, byte dow, UpdateHoursModel hours);
-        Task<BaseResponse<bool>> DeleteOpeningHoursAsync(int businessId, byte dow);
-        Task<BaseResponse<IEnumerable<HoursModel>>> GetMyOpeningHoursAsync(int businessId);
+        Task<BaseResponse<HoursModel>> AddOpeningHoursAsync(Guid ownerUserId, int businessId, CreateHoursModel hours, CancellationToken ct = default);
+        Task<BaseResponse<bool>> UpdateOpeningHoursAsync(Guid ownerUserId, int businessId, byte dow, UpdateHoursModel hours, CancellationToken ct = default);
+        Task<BaseResponse<bool>> DeleteOpeningHoursAsync(Guid ownerUserId, int businessId, byte dow, CancellationToken ct = default);
+        Task<BaseResponse<IEnumerable<HoursModel>>> GetMyOpeningHoursAsync(Guid ownerUserId, int businessId, CancellationToken ct = default);
 
         // Holiday
-        Task<BaseResponse<HolidayModel>> AddHolidayAsync(int businessId, CreateHolidayModel holiday);
-        Task<BaseResponse<bool>> DeleteHolidayAsync(int businessId, int holidayId);
-        
-        // Bookings 
-        Task<BaseResponse<IEnumerable<BookingModel>>> GetCurrentActiveBookings(int businessId, int pageNumber = 1, int pageSize = 10);
-        Task<BaseResponse<IEnumerable<BookingModel>>> GetAllBookingsAsync(int businessId, BookingRequest request, int pageNumber = 1, int pageSize = 10);
-        Task<BaseResponse<IEnumerable<BookingModel>>> GetDailyBookingsAsync(int businessId, DateTime date, int pageNumber = 1, int pageSize = 10);
-        Task<BaseResponse<bool>> ConfirmBookingAsync(int businessId, int bookingId);
-        Task<BaseResponse<bool>> CancelBookingAsync(int businessId, int bookingId);
+        Task<BaseResponse<HolidayModel>> AddHolidayAsync(Guid ownerUserId, int businessId, CreateHolidayModel holiday, CancellationToken ct = default);
+        Task<BaseResponse<bool>> DeleteHolidayAsync(Guid ownerUserId, int businessId, int holidayId, CancellationToken ct = default);
+
+        // Bookings (business side)
+        Task<BaseResponse<IEnumerable<BookingModel>>> GetCurrentActiveBookings(Guid ownerUserId, int businessId, int pageNumber = 1, int pageSize = 10, CancellationToken ct = default);
+        Task<BaseResponse<IEnumerable<BookingModel>>> GetAllBookingsAsync(Guid ownerUserId, int businessId, BookingRequest request, int pageNumber = 1, int pageSize = 10, CancellationToken ct = default);
+        Task<BaseResponse<IEnumerable<BookingModel>>> GetDailyBookingsAsync(Guid ownerUserId, int businessId, DateTime date, int pageNumber = 1, int pageSize = 10, CancellationToken ct = default);
+        Task<BaseResponse<bool>> ConfirmBookingAsync(Guid ownerUserId, int businessId, int bookingId, CancellationToken ct = default);
+        Task<BaseResponse<bool>> CancelBookingAsync(Guid ownerUserId, int businessId, int bookingId, CancellationToken ct = default);
     }
 }

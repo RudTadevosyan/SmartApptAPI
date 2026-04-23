@@ -59,6 +59,12 @@ CREATE UNIQUE INDEX UX_Booking_NoOverlap_Exact
 ON core.Booking(BusinessId, ServiceId, StartAtUtc)
 WHERE Status = 'Confirmed';
 
+CREATE UNIQUE INDEX IX_Business_OwnerUserId
+ON core.Business(OwnerUserId);
+
+CREATE UNIQUE INDEX IX_Customer_UserId
+ON core.Customer(UserId);
+
 CREATE TABLE core.OpeningHours (
   OpeningHoursId  INT IDENTITY PRIMARY KEY,
   BusinessId      INT NOT NULL REFERENCES core.Business(BusinessId),

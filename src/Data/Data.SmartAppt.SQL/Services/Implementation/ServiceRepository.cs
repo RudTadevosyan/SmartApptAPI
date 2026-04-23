@@ -19,8 +19,9 @@ namespace Data.SmartAppt.SQL.Services.Implementation
                 await ((SqlConnection)Connection).OpenAsync();
         }
 
-        public virtual async Task<int> CreateAsync(ServiceEntity service)
+        public virtual async Task<int> CreateAsync(ServiceEntity service, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.Service_Create", (SqlConnection)Connection);
@@ -40,21 +41,22 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             var output = new SqlParameter("@ServiceId", SqlDbType.Int) { Direction = ParameterDirection.Output };
             cmd.Parameters.Add(output);
 
-            await cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync(ct);
             return Convert.ToInt32(output.Value);
         }
 
-        public virtual async Task<ServiceEntity?> GetByIdAsync(int serviceId)
+        public virtual async Task<ServiceEntity?> GetByIdAsync(int serviceId, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.Service_GetById", (SqlConnection)Connection);
             cmd.CommandType = CommandType.StoredProcedure;
-            
+
             cmd.Parameters.Add(new SqlParameter("@ServiceId", SqlDbType.Int) { Value = serviceId });
 
-            using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            using var reader = await cmd.ExecuteReaderAsync(ct);
+            if (await reader.ReadAsync(ct))
             {
                 return new ServiceEntity
                 {
@@ -70,8 +72,9 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             return null;
         }
 
-        public virtual async Task<IEnumerable<ServiceEntity>> GetAllAsync(int pageNumber = 1, int pageSize = 10)
+        public virtual async Task<IEnumerable<ServiceEntity>> GetAllAsync(int pageNumber = 1, int pageSize = 10, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.Service_GetAll", (SqlConnection)Connection);
@@ -80,17 +83,17 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             cmd.Parameters.Add(new SqlParameter("@PageNumber", SqlDbType.Int) { Value = pageSize });
             cmd.Parameters.Add(new SqlParameter("@PageSize", SqlDbType.Int) { Value = pageNumber });
 
-            using var reader = await cmd.ExecuteReaderAsync();
+            using var reader = await cmd.ExecuteReaderAsync(ct);
             var services = new List<ServiceEntity>();
-            
+
             int ordServiceId = reader.GetOrdinal("ServiceId");
             int ordBusinessId = reader.GetOrdinal("BusinessId");
             int ordName = reader.GetOrdinal("Name");
             int ordDurationMin = reader.GetOrdinal("DurationMin");
             int ordPrice = reader.GetOrdinal("Price");
             int ordIsActive = reader.GetOrdinal("IsActive");
-            
-            while (await reader.ReadAsync())
+
+            while (await reader.ReadAsync(ct))
             {
                 services.Add(new ServiceEntity
                 {
@@ -106,27 +109,28 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             return services;
         }
 
-        public virtual async Task<IEnumerable<ServiceEntity>> GetByBusinessIdAsync(int businessId)
+        public virtual async Task<IEnumerable<ServiceEntity>> GetByBusinessIdAsync(int businessId, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             await EnsureOpenAsync();
-            
+
             using var cmd = new SqlCommand("core.Service_GetByBusinessId", (SqlConnection)Connection);
             cmd.CommandType = CommandType.StoredProcedure;
-            
+
             cmd.Parameters.Add(new SqlParameter("@BusinessId", SqlDbType.Int) { Value = businessId });
-            
-            using var reader = await cmd.ExecuteReaderAsync();
-            
-            var ordServiceId= reader.GetOrdinal("ServiceId");
-            var ordBusinessId= reader.GetOrdinal("BusinessId");
-            var ordName= reader.GetOrdinal("Name");
-            var ordDurationMin= reader.GetOrdinal("DurationMin");
-            var ordPrice= reader.GetOrdinal("Price");
-            var ordIsActive= reader.GetOrdinal("IsActive");
+
+            using var reader = await cmd.ExecuteReaderAsync(ct);
+
+            var ordServiceId = reader.GetOrdinal("ServiceId");
+            var ordBusinessId = reader.GetOrdinal("BusinessId");
+            var ordName = reader.GetOrdinal("Name");
+            var ordDurationMin = reader.GetOrdinal("DurationMin");
+            var ordPrice = reader.GetOrdinal("Price");
+            var ordIsActive = reader.GetOrdinal("IsActive");
 
             var services = new List<ServiceEntity>();
 
-            while (await reader.ReadAsync())
+            while (await reader.ReadAsync(ct))
             {
                 services.Add(new ServiceEntity
                 {
@@ -142,8 +146,9 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             return services;
         }
 
-        public virtual async Task UpdateAsync(ServiceEntity service)
+        public virtual async Task UpdateAsync(ServiceEntity service, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.Service_Update", (SqlConnection)Connection);
@@ -161,43 +166,46 @@ namespace Data.SmartAppt.SQL.Services.Implementation
                 Value = service.Price
             });
 
-            await cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync(ct);
         }
 
-        public virtual async Task DeleteAsync(int serviceId)
+        public virtual async Task DeleteAsync(int serviceId, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.Service_Delete", (SqlConnection)Connection);
-            
             cmd.CommandType = CommandType.StoredProcedure;
+
             cmd.Parameters.Add(new SqlParameter("@ServiceId", SqlDbType.Int) { Value = serviceId });
 
-            await cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync(ct);
         }
 
-        public virtual async Task DeactivateAsync(int serviceId)
+        public virtual async Task DeactivateAsync(int serviceId, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             await EnsureOpenAsync();
-            
+
             using var cmd = new SqlCommand("core.Service_Deactivate", (SqlConnection)Connection);
             cmd.CommandType = CommandType.StoredProcedure;
-            
+
             cmd.Parameters.Add(new SqlParameter("@ServiceId", SqlDbType.Int) { Value = serviceId });
-            
-            await cmd.ExecuteNonQueryAsync();
+
+            await cmd.ExecuteNonQueryAsync(ct);
         }
 
-        public virtual async Task ActivateAsync(int serviceId)
+        public virtual async Task ActivateAsync(int serviceId, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
             await EnsureOpenAsync();
-            
+
             using var cmd = new SqlCommand("core.Service_Activate", (SqlConnection)Connection);
             cmd.CommandType = CommandType.StoredProcedure;
-            
+
             cmd.Parameters.Add(new SqlParameter("@ServiceId", SqlDbType.Int) { Value = serviceId });
-            
-            await cmd.ExecuteNonQueryAsync();
+
+            await cmd.ExecuteNonQueryAsync(ct);
         }
     }
 }

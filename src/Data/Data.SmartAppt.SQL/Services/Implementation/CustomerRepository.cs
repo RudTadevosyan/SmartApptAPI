@@ -19,8 +19,10 @@ namespace Data.SmartAppt.SQL.Services.Implementation
                 await ((SqlConnection)Connection).OpenAsync();
         }
 
-        public virtual async Task<int> CreateAsync(CustomerEntity entity)
+        public virtual async Task<int> CreateAsync(CustomerEntity entity, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
+
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.Customer_Create", (SqlConnection)Connection);
@@ -33,16 +35,20 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             { Value = !string.IsNullOrEmpty(entity.Email) ? entity.Email : DBNull.Value });
             cmd.Parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar, 50)
             { Value = !string.IsNullOrEmpty(entity.Phone) ? entity.Phone : DBNull.Value });
+            cmd.Parameters.Add(new SqlParameter("@UserId", SqlDbType.UniqueIdentifier)
+            { Value = entity.UserId });
 
             var output = new SqlParameter("@CustomerId", SqlDbType.Int) { Direction = ParameterDirection.Output };
             cmd.Parameters.Add(output);
 
-            await cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync(ct);
             return Convert.ToInt32(output.Value);
         }
 
-        public virtual async Task DeleteAsync(int customerId)
+        public virtual async Task DeleteAsync(int customerId, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
+
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.Customer_Delete", (SqlConnection)Connection);
@@ -50,29 +56,32 @@ namespace Data.SmartAppt.SQL.Services.Implementation
 
             cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
 
-            await cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync(ct);
         }
 
-        public virtual async Task<IEnumerable<CustomerEntity>> GetAllAsync(int pageNumber = 1, int pageSize = 10)
+        public virtual async Task<IEnumerable<CustomerEntity>> GetAllAsync(int pageNumber = 1, int pageSize = 10, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
+
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.Customer_GetAll", (SqlConnection)Connection);
             cmd.CommandType = CommandType.StoredProcedure;
-            
+
             cmd.Parameters.Add(new SqlParameter("@PageNumber", SqlDbType.Int) { Value = pageNumber });
             cmd.Parameters.Add(new SqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize });
 
-            using var reader = await cmd.ExecuteReaderAsync();
+            using var reader = await cmd.ExecuteReaderAsync(ct);
+
             var customers = new List<CustomerEntity>();
-            
+
             int ordCustomerId = reader.GetOrdinal("CustomerId");
             int ordBusinessId = reader.GetOrdinal("BusinessId");
             int ordFullName = reader.GetOrdinal("FullName");
             int ordEmail = reader.GetOrdinal("Email");
             int ordPhone = reader.GetOrdinal("Phone");
-            
-            while (await reader.ReadAsync())
+
+            while (await reader.ReadAsync(ct))
             {
                 customers.Add(new CustomerEntity
                 {
@@ -80,27 +89,32 @@ namespace Data.SmartAppt.SQL.Services.Implementation
                     BusinessId = reader.GetInt32(ordBusinessId),
                     FullName = reader.GetString(ordFullName),
                     Email = reader.IsDBNull(ordEmail) ? null : reader.GetString(ordEmail),
-                    Phone = reader.IsDBNull(ordPhone) ? null : reader.GetString(ordPhone)
+                    Phone = reader.IsDBNull(ordPhone) ? null : reader.GetString(ordPhone),
+                    CreatedAtUtc = reader.GetDateTime(reader.GetOrdinal("CreatedAtUtc"))
                 });
             }
 
             return customers;
         }
 
-        public virtual async Task<IEnumerable<CustomerEntity>> GetByBusinessIdAsync(int businessId, int pageNumber = 1, int pageSize = 10)
+        public virtual async Task<IEnumerable<CustomerEntity>> GetByBusinessIdAsync(int businessId, int pageNumber = 1, int pageSize = 10, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
+
             await EnsureOpenAsync();
 
             var customers = new List<CustomerEntity>();
+
             using var cmd = new SqlCommand("core.Customer_GetByBusinessId", (SqlConnection)Connection);
             cmd.CommandType = CommandType.StoredProcedure;
-            
+
             cmd.Parameters.Add(new SqlParameter("@BusinessId", SqlDbType.Int) { Value = businessId });
             cmd.Parameters.Add(new SqlParameter("@PageNumber", SqlDbType.Int) { Value = pageNumber });
             cmd.Parameters.Add(new SqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize });
 
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            using var reader = await cmd.ExecuteReaderAsync(ct);
+
+            while (await reader.ReadAsync(ct))
             {
                 customers.Add(new CustomerEntity
                 {
@@ -108,23 +122,28 @@ namespace Data.SmartAppt.SQL.Services.Implementation
                     BusinessId = reader.GetInt32(reader.GetOrdinal("BusinessId")),
                     FullName = reader.GetString(reader.GetOrdinal("FullName")),
                     Email = reader.IsDBNull(reader.GetOrdinal("Email")) ? null : reader.GetString(reader.GetOrdinal("Email")),
-                    Phone = reader.IsDBNull(reader.GetOrdinal("Phone")) ? null : reader.GetString(reader.GetOrdinal("Phone"))
+                    Phone = reader.IsDBNull(reader.GetOrdinal("Phone")) ? null : reader.GetString(reader.GetOrdinal("Phone")),
+                    CreatedAtUtc = reader.GetDateTime(reader.GetOrdinal("CreatedAtUtc"))
                 });
             }
 
             return customers;
         }
 
-        public virtual async Task<CustomerEntity?> GetByIdAsync(int customerId)
+        public virtual async Task<CustomerEntity?> GetByIdAsync(int customerId, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
+
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.Customer_GetById", (SqlConnection)Connection);
             cmd.CommandType = CommandType.StoredProcedure;
+
             cmd.Parameters.Add(new SqlParameter("@CustomerId", SqlDbType.Int) { Value = customerId });
 
-            using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            using var reader = await cmd.ExecuteReaderAsync(ct);
+
+            if (await reader.ReadAsync(ct))
             {
                 return new CustomerEntity
                 {
@@ -132,15 +151,19 @@ namespace Data.SmartAppt.SQL.Services.Implementation
                     BusinessId = reader.GetInt32(reader.GetOrdinal("BusinessId")),
                     FullName = reader.GetString(reader.GetOrdinal("FullName")),
                     Email = reader.IsDBNull(reader.GetOrdinal("Email")) ? null : reader.GetString(reader.GetOrdinal("Email")),
-                    Phone = reader.IsDBNull(reader.GetOrdinal("Phone")) ? null : reader.GetString(reader.GetOrdinal("Phone"))
+                    Phone = reader.IsDBNull(reader.GetOrdinal("Phone")) ? null : reader.GetString(reader.GetOrdinal("Phone")),
+                    UserId = reader.GetGuid(reader.GetOrdinal("UserId")),
+                    CreatedAtUtc = reader.GetDateTime(reader.GetOrdinal("CreatedAtUtc"))
                 };
             }
 
             return null;
         }
 
-        public virtual async Task UpdateAsync(CustomerEntity entity)
+        public virtual async Task UpdateAsync(CustomerEntity entity, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
+
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.Customer_Update", (SqlConnection)Connection);
@@ -155,7 +178,40 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             cmd.Parameters.Add(new SqlParameter("@Phone", SqlDbType.NVarChar, 50)
             { Value = !string.IsNullOrEmpty(entity.Phone) ? entity.Phone : DBNull.Value });
 
-            await cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync(ct);
+        }
+
+        public virtual async Task<CustomerEntity?> GetByUserIdAsync(Guid userId, CancellationToken ct = default)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            await EnsureOpenAsync();
+
+            using var cmd = new SqlCommand("core.Customer_GetByUserId", (SqlConnection)Connection);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add(new SqlParameter("@UserId", SqlDbType.UniqueIdentifier)
+            {
+                Value = userId
+            });
+
+            using var reader = await cmd.ExecuteReaderAsync(ct);
+
+            if (await reader.ReadAsync(ct))
+            {
+                return new CustomerEntity
+                {
+                    CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                    BusinessId = reader.GetInt32(reader.GetOrdinal("BusinessId")),
+                    UserId = reader.GetGuid(reader.GetOrdinal("UserId")),
+                    FullName = reader.GetString(reader.GetOrdinal("FullName")),
+                    Email = reader.IsDBNull(reader.GetOrdinal("Email")) ? null : reader.GetString(reader.GetOrdinal("Email")),
+                    Phone = reader.IsDBNull(reader.GetOrdinal("Phone")) ? null : reader.GetString(reader.GetOrdinal("Phone")),
+                    CreatedAtUtc = reader.GetDateTime(reader.GetOrdinal("CreatedAtUtc"))
+                };
+            }
+
+            return null;
         }
     }
 }

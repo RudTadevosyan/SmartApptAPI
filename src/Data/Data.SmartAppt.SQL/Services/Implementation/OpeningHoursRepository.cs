@@ -19,8 +19,10 @@ namespace Data.SmartAppt.SQL.Services.Implementation
                 await ((SqlConnection)Connection).OpenAsync();
         }
 
-        public virtual async Task<int> CreateAsync(OpeningHoursEntity entity)
+        public virtual async Task<int> CreateAsync(OpeningHoursEntity entity, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
+
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.OpeningHours_Create", (SqlConnection)Connection);
@@ -34,24 +36,28 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             var output = new SqlParameter("@OpeningHoursId", SqlDbType.Int) { Direction = ParameterDirection.Output };
             cmd.Parameters.Add(output);
 
-            await cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync(ct);
             return Convert.ToInt32(output.Value);
         }
 
-        public virtual async Task DeleteAsync(int hoursId)
+        public virtual async Task DeleteAsync(int hoursId, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
+
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.OpeningHours_Delete", (SqlConnection)Connection);
             cmd.CommandType = CommandType.StoredProcedure;
-           
+
             cmd.Parameters.Add(new SqlParameter("@OpeningHoursId", SqlDbType.Int) { Value = hoursId });
 
-            await cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync(ct);
         }
 
-        public virtual async Task<IEnumerable<OpeningHoursEntity>> GetAllAsync(int pageNumber = 1, int pageSize = 10)
+        public virtual async Task<IEnumerable<OpeningHoursEntity>> GetAllAsync(int pageNumber = 1, int pageSize = 10, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
+
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.OpeningHours_GetAll", (SqlConnection)Connection);
@@ -60,16 +66,16 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             cmd.Parameters.Add(new SqlParameter("@PageNumber", SqlDbType.Int) { Value = pageNumber });
             cmd.Parameters.Add(new SqlParameter("@PageSize", SqlDbType.Int) { Value = pageSize });
 
-            using var reader = await cmd.ExecuteReaderAsync();
+            using var reader = await cmd.ExecuteReaderAsync(ct);
             var list = new List<OpeningHoursEntity>();
-            
+
             int ordOpeningHoursId = reader.GetOrdinal("OpeningHoursId");
             int ordBusinessId = reader.GetOrdinal("BusinessId");
             int ordDayOfWeek = reader.GetOrdinal("DayOfWeek");
             int ordOpenTime = reader.GetOrdinal("OpenTime");
             int ordCloseTime = reader.GetOrdinal("CloseTime");
-            
-            while (await reader.ReadAsync())
+
+            while (await reader.ReadAsync(ct))
             {
                 list.Add(new OpeningHoursEntity
                 {
@@ -84,18 +90,20 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             return list;
         }
 
-        public virtual async Task<IEnumerable<OpeningHoursEntity>> GetByBusinessIdAsync(int businessId)
+        public virtual async Task<IEnumerable<OpeningHoursEntity>> GetByBusinessIdAsync(int businessId, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
+
             await EnsureOpenAsync();
 
             var result = new List<OpeningHoursEntity>();
             using var cmd = new SqlCommand("core.OpeningHours_GetByBusinessId", (SqlConnection)Connection);
             cmd.CommandType = CommandType.StoredProcedure;
-           
+
             cmd.Parameters.Add(new SqlParameter("@BusinessId", SqlDbType.Int) { Value = businessId });
 
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            using var reader = await cmd.ExecuteReaderAsync(ct);
+            while (await reader.ReadAsync(ct))
             {
                 result.Add(new OpeningHoursEntity
                 {
@@ -110,8 +118,10 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             return result;
         }
 
-        public virtual async Task<OpeningHoursEntity?> GetByBusinessIdAndDowAsync(int businessId, byte dayOfWeek)
+        public virtual async Task<OpeningHoursEntity?> GetByBusinessIdAndDowAsync(int businessId, byte dayOfWeek, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
+
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.OpeningHours_GetByBusinessIdAndDow", (SqlConnection)Connection);
@@ -120,8 +130,8 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             cmd.Parameters.Add(new SqlParameter("@BusinessId", SqlDbType.Int) { Value = businessId });
             cmd.Parameters.Add(new SqlParameter("@DayOfWeek", SqlDbType.TinyInt) { Value = dayOfWeek });
 
-            using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            using var reader = await cmd.ExecuteReaderAsync(ct);
+            if (await reader.ReadAsync(ct))
             {
                 return new OpeningHoursEntity
                 {
@@ -136,17 +146,19 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             return null;
         }
 
-        public virtual async Task<OpeningHoursEntity?> GetByIdAsync(int hoursId)
+        public virtual async Task<OpeningHoursEntity?> GetByIdAsync(int hoursId, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
+
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.OpeningHours_GetById", (SqlConnection)Connection);
             cmd.CommandType = CommandType.StoredProcedure;
-            
+
             cmd.Parameters.Add(new SqlParameter("@OpeningHoursId", SqlDbType.Int) { Value = hoursId });
 
-            using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            using var reader = await cmd.ExecuteReaderAsync(ct);
+            if (await reader.ReadAsync(ct))
             {
                 return new OpeningHoursEntity
                 {
@@ -161,8 +173,10 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             return null;
         }
 
-        public virtual async Task UpdateAsync(OpeningHoursEntity entity)
+        public virtual async Task UpdateAsync(OpeningHoursEntity entity, CancellationToken ct = default)
         {
+            ct.ThrowIfCancellationRequested();
+
             await EnsureOpenAsync();
 
             using var cmd = new SqlCommand("core.OpeningHours_Update", (SqlConnection)Connection);
@@ -174,7 +188,7 @@ namespace Data.SmartAppt.SQL.Services.Implementation
             cmd.Parameters.Add(new SqlParameter("@OpenTime", SqlDbType.Time) { Value = entity.OpenTime });
             cmd.Parameters.Add(new SqlParameter("@CloseTime", SqlDbType.Time) { Value = entity.CloseTime });
 
-            await cmd.ExecuteNonQueryAsync();
+            await cmd.ExecuteNonQueryAsync(ct);
         }
     }
 }
