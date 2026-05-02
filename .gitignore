@@ -48,11 +48,10 @@ Desktop.ini
 
 *.sln.DotSettings
 
-appsettings.json
-
 *.DotSettings
 *.DotSettings.user
 
+appsettings.json
 appsettings*.json
 
 # if you have a template to keep
