@@ -12,7 +12,6 @@ namespace SmartAppt.API.Controllers
 {
     [ApiController]
     [Route("api/businesses")]
-    [Authorize(Roles = "BusinessOwner")] 
     public class BusinessController : ControllerBase
     {
         private readonly IBusinessService _businessService;
@@ -30,6 +29,7 @@ namespace SmartAppt.API.Controllers
             return Guid.TryParse(value, out var id) ? id : Guid.Empty;
         }
         
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpPost]
         public async Task<IActionResult> CreateBusiness([FromBody] CreateBusinessModel model, CancellationToken ct)
         {
@@ -39,6 +39,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner,Customer")]
         [HttpGet("{businessId}")]
         public async Task<IActionResult> GetMyBusiness(int businessId, CancellationToken ct)
         {
@@ -47,6 +48,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpPut("{businessId}")]
         public async Task<IActionResult> UpdateBusiness(int businessId, [FromBody] UpdateBusinessModel model, CancellationToken ct)
         {
@@ -54,7 +56,8 @@ namespace SmartAppt.API.Controllers
             var result = await _businessService.UpdateBusinessAsync(userId, businessId, model, ct);
             return StatusCode(result.HttpStatusCode, result);
         }
-
+        
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpDelete("{businessId}")]
         public async Task<IActionResult> DeleteBusiness(int businessId, CancellationToken ct)
         {
@@ -63,6 +66,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpPost("{businessId}/services")]
         public async Task<IActionResult> AddService(int businessId, [FromBody] CreateServiceModel model, CancellationToken ct)
         {
@@ -71,6 +75,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner,Customer")]
         [HttpGet("{businessId}/services")]
         public async Task<IActionResult> GetMyServices(int businessId, CancellationToken ct)
         {
@@ -79,6 +84,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpPut("{businessId}/services/{serviceId}")]
         public async Task<IActionResult> UpdateService(int businessId, int serviceId, [FromBody] UpdateServiceModel model, CancellationToken ct)
         {
@@ -87,6 +93,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpDelete("{businessId}/services/{serviceId}")]
         public async Task<IActionResult> DeleteService(int businessId, int serviceId, CancellationToken ct)
         {
@@ -95,6 +102,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpPost("{businessId}/services/{serviceId}/deactivate")]
         public async Task<IActionResult> DeactivateService(int businessId, int serviceId, CancellationToken ct)
         {
@@ -103,6 +111,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpPost("{businessId}/services/{serviceId}/activate")]
         public async Task<IActionResult> ActivateService(int businessId, int serviceId, CancellationToken ct)
         {
@@ -111,6 +120,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpPost("{businessId}/hours")]
         public async Task<IActionResult> AddOpeningHours(int businessId, [FromBody] CreateHoursModel model, CancellationToken ct)
         {
@@ -119,6 +129,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner,Customer")]
         [HttpGet("{businessId}/hours")]
         public async Task<IActionResult> GetMyOpeningHours(int businessId, CancellationToken ct)
         {
@@ -127,6 +138,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpPut("{businessId}/hours/{dow}")]
         public async Task<IActionResult> UpdateOpeningHours(int businessId, byte dow, [FromBody] UpdateHoursModel model, CancellationToken ct)
         {
@@ -135,6 +147,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpDelete("{businessId}/hours/{dow}")]
         public async Task<IActionResult> DeleteOpeningHours(int businessId, byte dow, CancellationToken ct)
         {
@@ -143,6 +156,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpPost("{businessId}/holidays")]
         public async Task<IActionResult> AddHoliday(int businessId, [FromBody] CreateHolidayModel model, CancellationToken ct)
         {
@@ -151,6 +165,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpDelete("{businessId}/holidays/{holidayId}")]
         public async Task<IActionResult> DeleteHoliday(int businessId, int holidayId, CancellationToken ct)
         {
@@ -159,6 +174,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpGet("{businessId}/bookings/confirmed")]
         public async Task<IActionResult> GetCurrentBookings(int businessId, int pageNumber = 1, int pageSize = 10, CancellationToken ct = default)
         {
@@ -167,6 +183,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpGet("{businessId}/bookings/{year}/{month}/{day}")]
         public async Task<IActionResult> GetDailyBookings(int businessId, int day, int month, int year, int pageNumber = 1, int pageSize = 10, CancellationToken ct = default)
         {
@@ -179,6 +196,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpPost("{businessId}/bookings/{bookingId}/confirm")]
         public async Task<IActionResult> ConfirmBooking(int businessId, int bookingId, CancellationToken ct)
         {
@@ -187,6 +205,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpPost("{businessId}/bookings/{bookingId}/cancel")]
         public async Task<IActionResult> CancelBooking(int businessId, int bookingId, CancellationToken ct)
         {
@@ -195,6 +214,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpGet("{businessId}/bookings")]
         public async Task<IActionResult> GetBookings(int businessId, [FromQuery] BookingRequest request, int pageNumber = 1, int pageSize = 10, CancellationToken ct = default)
         {
@@ -203,6 +223,7 @@ namespace SmartAppt.API.Controllers
             return StatusCode(result.HttpStatusCode, result);
         }
 
+        [Authorize(Roles = "BusinessOwner")] 
         [HttpGet("{businessId}/customers")]
         public async Task<IActionResult> GetBusinessCustomers(int businessId, int pageNumber = 1, int pageSize = 10, CancellationToken ct = default)
         {

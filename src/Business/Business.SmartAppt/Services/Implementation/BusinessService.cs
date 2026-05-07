@@ -140,9 +140,6 @@ namespace Business.SmartAppt.Services.Implementation
                 var business = await BusinessRepository.GetByIdAsync(businessId, ct);
                 if (business == null)
                     return new BaseResponse<BusinessModel> { HttpStatusCode = 404, Message = $"Business with {businessId} id not found" };
-
-                if (business.OwnerUserId != ownerUserId)
-                    return new BaseResponse<BusinessModel> {HttpStatusCode = 403, Message = "Forbidden"};
                 
                 return new BaseResponse<BusinessModel>
                 {
@@ -424,9 +421,6 @@ namespace Business.SmartAppt.Services.Implementation
                 if (business == null)
                     return new BaseResponse<IEnumerable<ServiceModel>> { HttpStatusCode = 404, Message = $"Business with {businessId} id not found" };
                 
-                if (business.OwnerUserId != ownerUserId)
-                    return new BaseResponse<IEnumerable<ServiceModel>> { HttpStatusCode = 403, Message = "Forbidden"  };
-                
                 var services = await ServiceRepository.GetByBusinessIdAsync(businessId, ct);
                 
                 List<ServiceModel> servicesList = new List<ServiceModel>();
@@ -591,9 +585,6 @@ namespace Business.SmartAppt.Services.Implementation
                 var business = await BusinessRepository.GetByIdAsync(businessId, ct);
                 if (business == null)
                     return new BaseResponse<IEnumerable<HoursModel>> { HttpStatusCode = 404, Message = $"Business with {businessId} not found" };
-                
-                if (ownerUserId != business.OwnerUserId)
-                    return new BaseResponse<IEnumerable<HoursModel>> { HttpStatusCode = 403, Message = "Forbidden" };
                 
                 var hours = await OpeningHoursRepository.GetByBusinessIdAsync(businessId, ct);
                 List<HoursModel> hoursList = new List<HoursModel>();
